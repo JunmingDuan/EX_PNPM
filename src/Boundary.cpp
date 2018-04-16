@@ -4,7 +4,7 @@ void DGFEMSpace1D::Boundary(func BL, func BR, double& BD_L, double& BD_R, const 
   VEC<VEC<double> > pw = QUADINFO[0].LG(K);
   VEC<double> gv(2), lv(2);
   lv[0] = -1, lv[1] = 1;
-  gv[0] = dt, gv[1] = dt+t;
+  gv[0] = t, gv[1] = dt+t;
   VEC<double> gt(K);
   for(u_int j = 0; j < K; ++j) {
     local_to_global(pw[0][j], lv, gv, &gt[j]);
@@ -15,8 +15,8 @@ void DGFEMSpace1D::Boundary(func BL, func BR, double& BD_L, double& BD_R, const 
     BD_L += pw[1][g]*BL(mu, mesh[0], gt[g]);
     BD_R += pw[1][g]*BR(mu, mesh[Nx], gt[g]);
   }
-  BD_L *= mu*dt;
-  BD_R *= mu*dt;
+  BD_L *= mu*dt/2.;
+  BD_R *= mu*dt/2.;
 
 }
 

@@ -1,9 +1,9 @@
 #include "para.h"
 
 u_int M = 1;
-u_int K = 1;
+u_int K = 2;
 //0 for ghost = 0, 1 for flux = 0, 2 for period BD
-u_int BDL = 2; u_int BDR = 2;
+u_int BDL = 1; u_int BDR = 1;
 double EPS = 0;
 
 double c = 1;

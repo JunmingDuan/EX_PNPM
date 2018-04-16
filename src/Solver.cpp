@@ -64,7 +64,7 @@ double DGFEMSpace1D::RAD_BE_unsteady(const SOL& In, const SOL& I,
         A = hi*M1;
         if(i == 0) {
           FLUX = BD_L*Lagrange_Poly(-1);
-          rhs = hi*M1*In[i][m] + (mu[m]*dt)*Mx*W - FLUX + dt*Fx_minus*W_uw;
+          rhs = hi*M1*In[i][m] + (mu[m]*dt)*Mx*W - dt*Fx_plus*W + FLUX;
         }
         else {
           rhs = hi*M1*In[i][m] + (mu[m]*dt)*Mx*W - dt*Fx_plus*W + dt*Fx_minus*W_uw;

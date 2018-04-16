@@ -197,6 +197,7 @@ void DGFEMSpace1D::init(func I0) {
 }
 
 double DGFEMSpace1D::cal_dt(const SOL& I, const double t) {
+  return 1e-3;
   return 0.5*(mesh[1]-mesh[0])/mu[0]/(2*K-1);
 }
 

@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
   Problem.init(I0);
   std::cout << "Start to solve ..." << std::endl;
   t1 = clock();
-  Problem.run_unsteady(sigma_t, sigma_s, q, BL, BR, 2e-1);
+  Problem.run_unsteady(sigma_t, sigma_s, q, BL, BR, 3e-3);
   std::cout << "Finished ..." << std::endl;
   t2 = clock();
   std::stringstream s;
