@@ -12,8 +12,9 @@
 #include "DGFEMSpace1D.h"
 
 double I0(const double mu, const double x, const double t) {
-  //return sin(2*M_PI*(x-1.0*t));
-  return sin(2*M_PI*(x-1.0*t))*exp(-1e1*t);
+  if(x > 0.1 + t && x < 0.3 + t) return 1;
+  else return 0;
+  return sin(2*M_PI*(x-1.0*t));
 }
 
 double BL(const double mu, const double x, const double t) {
@@ -34,8 +35,7 @@ double sigma_s(const double x) {
 }
 
 double q(const double mu, const double I, const double x, const double t) {
-  double para = -1e1;
-  return para*I;
+  return 0;
 }
 
 int main(int argc, char *argv[]) {

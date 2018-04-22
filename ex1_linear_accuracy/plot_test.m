@@ -9,3 +9,6 @@ numer1 = load(['ex1_Nx',num2str(n),'_K',num2str(K),'.dat']);
 x1 = numer1(:,1); y1 = numer1(:,3);
 plot(x1, y1, 'o');
 
+ind = 18;
+plot(x1(K*ind+1:K*(ind+1)), y1(K*ind+1:K*(ind+1)), '*');
+

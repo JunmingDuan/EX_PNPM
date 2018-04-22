@@ -20,22 +20,26 @@ DGFEMSpace1D::DGFEMSpace1D(u_int Nx, double xl, double xr)
   }
   mu.resize(M);
   wgt.resize(M);
-  I.resize(Nx); I1.resize(Nx); In.resize(Nx);
+  I.resize(Nx); I1.resize(Nx);
+  I_av.resize(Nx);
   W.resize(K*K);
   W_uw.resize(K*K);
   for(u_int i = 0; i < Nx; ++i) {
-    I[i].resize(M); I1[i].resize(M); In[i].resize(M);
+    I[i].resize(M); I1[i].resize(M);
+    I_av[i].resize(M);
     for(u_int m = 0; m < M; ++m) {
-      I[i][m].resize(K); I1[i][m].resize(K); In[i][m].resize(K);
+      I[i][m].resize(K); I1[i][m].resize(K);
     }
   }
   M1.resize(K, K);
   Mx.resize(K, K*K);
   Fx_plus.resize(K, K*K);
   Fx_minus.resize(K, K*K);
+  Mt.resize(K, K*K);
   K1.resize(K*K, K*K);
   Kx.resize(K*K, K*K);
   F0.resize(K*K, K);
+  MM.resize(K*K, K*K);
   A.resize(K, K);
   rhs.resize(K);
 }
@@ -108,7 +112,16 @@ void DGFEMSpace1D::BuildUniMAT() {
     for(u_int q = 0; q < K*K; ++q) {
       st2coe(q, qx, qt);
       Fx_plus(l,q) = 0.5*w[qt]*pr[qx]*pr[l];
-      Fx_minus(l,q) = 0.5*w[qt]*pl[qx]*pl[l];
+      Fx_minus(l,q) = 0.5*w[qt]*pr[qx]*pl[l];
+    }
+  }
+  Mt.setZero();
+  for(u_int l = 0; l < K; ++l) {
+    for(u_int q = 0; q < K*K; ++q) {
+      st2coe(q, qx, qt);
+      if(l == qx) {
+        Mt(l,q) = 0.25*w[l]*w[qt];
+      }
     }
   }
   K1.setZero();
@@ -143,6 +156,15 @@ void DGFEMSpace1D::BuildUniMAT() {
       }
     }
   }
+  MM.setZero();
+  for(u_int p = 0; p < K*K; ++p) {
+    for(u_int q = 0; q < K*K; ++q) {
+      if(p == q) {
+        st2coe(p, px, pt);
+        MM(p,q) = 0.25*w[px]*w[pt];
+      }
+    }
+  }
 
   //std::cout << "M1:" << std::endl;
   //std::cout << M1 << std::endl;
@@ -166,6 +188,19 @@ void DGFEMSpace1D::Projection(u_int cell, func I0, double t, bU& u) {
   for(u_int m = 0; m < M; ++m) {
     for(u_int g = 0; g < K; ++g) {
       u[m][g] = I0(mu[m], p[g], t);
+    }
+  }
+}
+
+void DGFEMSpace1D::DG2av(const SOL& I, VEC<VEC<double>>& I_av) {
+  VEC<double> w = TemQuad_Gauss.weight();
+  for(u_int m = 0; m < M; ++m) {
+    for(u_int i = 0; i < Nx; ++i) {
+      I_av[i][m] = 0;
+      for(u_int g = 0; g < K; ++g) {
+        I_av[i][m] += w[g]*I[i][m][g];
+      }
+      I_av[i][m] /= 2.0;
     }
   }
 }
@@ -197,8 +232,10 @@ void DGFEMSpace1D::init(func I0) {
 }
 
 double DGFEMSpace1D::cal_dt(const SOL& I, const double t) {
-  return 1e-3;
-  return 0.5*(mesh[1]-mesh[0])/mu[0]/(2*K-1);
+  //return 1e-3;
+  double h = mesh[1]-mesh[0];
+  //return 0.5*h;
+  return 0.5*h/fabs(mu[0])/(2*K-1);
 }
 
 void DGFEMSpace1D::print_DG_coe(std::ostream& os) {
@@ -219,7 +256,7 @@ void DGFEMSpace1D::print_DG_coe(std::ostream& os) {
   os << std::defaultfloat;
 }
 
-void DGFEMSpace1D::print_solution_integral(std::ostream& os) {
+void DGFEMSpace1D::print_solution_integral(const SOL& I, std::ostream& os) {
   os.precision(16);
   os << std::showpos;
   os.setf(std::ios::scientific);
@@ -250,4 +287,31 @@ void DGFEMSpace1D::print_solution_average(std::ostream& os) {
   os << std::endl;
   os << std::defaultfloat;
 }
+
+void DGFEMSpace1D::print_sol_ex_integral(std::ostream& os, func I0, const double t) {
+  os.precision(16);
+  os << std::showpos;
+  os.setf(std::ios::scientific);
+  //reconstruct for calculating err
+  Reconstruct(I, I1);
+  //I1 = I;
+  for(u_int i = 0; i < Nx; ++i) {
+    VEC<double> w = QUADINFO[i].weight();
+    VEC<double> p = QUADINFO[i].points();
+    for(u_int g = 0; g < w.size(); ++g) {
+      os << p[g] << " "  << w[g];
+      for(u_int m = 0; m < M; ++m) {
+        os  << " " << I1[i][m][g];
+      }
+      for(u_int m = 0; m < M; ++m) {
+        os << " " << I0(mu[m], p[g], t);
+      }
+      os << "\n";
+    }
+    os << "\n";
+  }
+  os << std::endl;
+  os << std::defaultfloat;
+}
+
 

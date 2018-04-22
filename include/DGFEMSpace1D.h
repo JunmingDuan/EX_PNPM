@@ -27,8 +27,9 @@ class DGFEMSpace1D {
     VEC<double> mu;
     VEC<double> wgt;
     double sum_wm;
-    EMAT M1, Mx, Fx_plus, Fx_minus, K1, Kx, F0;//universal matrices
-    SOL I, In, I1;//dimension: Nx*M*K
+    EMAT M1, Mx, Fx_plus, Fx_minus, Mt, K1, Kx, F0, MM;//universal matrices
+    SOL I, I1;//dimension: Nx*M*K
+    VEC<VEC<double>> I_av;
     ST_ele W, W_uw;
     BM bml, bmr;
     double BD_L, BD_R;
@@ -46,18 +47,22 @@ class DGFEMSpace1D {
     EVEC Composition(const SOL&, u_int cell, double x);
     void init(func I0);
     double cal_dt(const SOL&, const double);
-    double RAD_BE_unsteady(const SOL& In, const SOL& I,
-        func_para, func_para, func, const double, const double, SOL&, func, func);
+    double RAD_BE_unsteady(SOL& I,
+        func_para, func_para, src, const double, const double, func, func);
     void Boundary(func BL, func BR, double& BD_L, double& BD_R, const double mu, const double t, const double dt);
     void solve_leqn(const EMAT&, const EVEC&, EVEC&);
     void STDG_predictor(const SOL&, const double dt, const u_int, const u_int, ST_ele& W);
-    void run_unsteady(func_para, func_para, func, func, func, double t_end);
+    void DG2av(const SOL& I, VEC<VEC<double>>& I_av);
+    void Reconstruct(const SOL& I0, SOL& I);
+    void run_unsteady(func_para, func_para, src, func, func, double t_end);
     double cal_norm_I(const SOL& s1, const SOL& s2, int n);
     double cal_err(const SOL& s1, int n, double t_end);
     void print_DG_coe(std::ostream&);
-    void print_solution_integral(std::ostream&);
+    void print_solution_integral(const SOL&, std::ostream&);
     void print_solution_average(std::ostream&);
+    void print_sol_ex_integral(std::ostream& os, func, const double t);
     int plot_I(engine*, const VEC<double>& mesh, const SOL& In);
+    void scaling_limiter(const u_int, EVEC& u);
 };
 
 #endif //DGFEMSPACE1D_H

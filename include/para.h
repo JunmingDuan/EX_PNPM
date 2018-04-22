@@ -8,6 +8,7 @@
 
 typedef int BM;
 typedef VEC<VEC<double>> QUAD;
+typedef double (*src)(const double, const double, const double, const double);
 typedef double (*func)(const double, const double, const double);
 typedef double (*func_para)(const double);
 typedef Eigen::MatrixXd EMAT;
